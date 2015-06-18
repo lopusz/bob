@@ -1,0 +1,25 @@
+#!/bin/bash
+
+BOB_DIR=$(dirname ${0})
+
+if ! which dot > /dev/null; then
+    echo \
+      "FATAL: No dot utility found. Install graphviz and put it on your path."
+    exit 1
+fi
+
+if ! which display > /dev/null ; then
+    echo \
+      "FATAL: No display utility found. Install ImageMagick and put it on your path."
+    exit 1
+fi
+
+if [[ $# == 0 ]]; then
+    ${BOB_DIR}/bob graph -f dot | dot -Tsvg | display
+    echo "Zero"
+elif [[ $# == 1 ]]; then
+    ${BOB_DIR}/bob graph -f dot ${1} | dot -Tsvg | display
+else
+    echo "FATAL: Too many arguments. Please provide one TAG_EDN file name. "
+    exit 1
+fi

@@ -1,0 +1,103 @@
+* Issues & ideas
+  + *[bug]* =bob bu unknown-resource-or-tag= gives exception
+  + *[general]* Correct the output of =bob rules= for tagging rules
+    Tagging rules = rules with empty cmd and inp.
+    Tagging rules define the tag for group of files.
+  + *[general]* Add stats command, which will give
+    + number of input files
+    + number of output files
+    + number of rules
+  + *[general]* Is it possible to define tasks for all CPUS?
+  + *[general]* Check Clojure lint https://github.com/jonase/eastwood
+    Problems with running the linter version 0.1.2
+    ~ArityException Wrong number of args (1) passed to: validate-loop-locals/validate-loop-locals~
+  + *[general]* Add validation of tags
+  + *[general]* Check if graph does not have cycles
+  + *[general]* Add option to delete outputs of failed commands
+  + *[general]* Write all successful build commands to durable disk que
+    This protects from treating crashing jobs results as correct.
+  + *[general]* Refactor ruler module that contains all operations on rules
+  + *[general]* Introduce option to run build process for tagged files
+  + *[general]* Unify command so everything is accessible with =bob command=
+  + *[graph]* Add format - uml (for yuml) (is it worth?)
+  + *[general]* Refactor -r -> -f so it conforms make standard
+    Check how the starting directory, affects automatic tags
+  + *[general]* Check if rules without output and without input work as
+    expected
+  + *[general]* Check how it works for rules when there is no input
+  + *[general]* Add repl options to run bob commands
+  + *[general]* Add server mode to run commands through nrepl
+  + *[general]* Check why executing bob in-dir is faster than out-dir
+    The rules after pruning outdated and uneccessary should be the same.
+  + *[orchestrator]* Check the influence of rules seq to set change
+    See filter-only-necessary-rules.
+    Command `bob ou` prints the rules in random order.
+    Convert the name so it includes -set
+  + *[general]* Add checking for multiple rules generating one res
+  + *[general]* Add inputs command analogous to output
+  + *[general]* Improve logging
+    Add default writing to bob.log, with the option to disable it.
+    Write to log without colors
+    Should I flush logs every time I write to it?
+  + *[general]* Improve scheduling
+    It not only gives the number of cpus, but also core-ids (for further use
+    with taskset)
+  + *[general]* Keep rules as set
+    Look into bob.rules/run-build and, check if rules should be kept as set.
+  + *[general]* Add option to execute the build as far as possible
+
+* Done
+  + *[general]* @5 Adding exiting code of last command for build
+  + *[general]* @4 Add escaping characters in filenames
+     List of chars is here
+     http://stackoverflow.com/questions/19177076/list-of-characters-which-needs-to-be-escaped-in-a-linux-shell-command
+  + *[general]* @3 Add total time in running jobs
+  + *[general]* @2 Add final status line with the output failed/stopped/OK + total build time
+  + *[general]* @1 Added removing tagging rules in product-res calculation
+  + *[general]* Add option to stop bob gracefully via STOP file
+  + *[graph]* Introduce option for customizing nodes (shape, color)
+    This is best acomplished by adding special file which lists tags
+    for which we want dependencies and describes their appearance
+  + *[general]* Refactor the code so default name is "bob.clj"
+  + *[general]* Check namespaces against nesting
+  + *[general]* Refactor test names so they end with -test
+  + *[generator]* Automatically reduce rule cpus to maximum available on the
+     system
+  + *[orchestrator]* Remove the error when we already wait for rules to finish
+    Probably it has to do with set/seq issue
+    #+BEGIN_SRC
+    Exception in thread "main" java.lang.ClassCastException: clojure.lang.LazySeq cannot be cast to clojure.lang.IPersistentSet
+	at clojure.core$disj.invoke(core.clj:1436)
+	at clojure.core.protocols$fn__6022.invoke(protocols.clj:79)
+	at clojure.core.protocols$fn__5979$G__5974__5992.invoke(protocols.clj:13)
+	at clojure.core$reduce.invoke(core.clj:6177)
+	at clojure.set$difference.invoke(set.clj:59)
+	at bob.orchestrator$wait_for_running_rules.invoke(orchestrator.clj:270)
+	at bob.orchestrator$run_build.invoke(orchestrator.clj:301)
+	at bob.orchestrator$build.invoke(orchestrator.clj:359)
+	at bob.main$main_build.invoke(main.clj:127)
+	at bob.main$_main.doInvoke(main.clj:221)
+	at clojure.lang.RestFn.applyTo(RestFn.java:137)
+	at bob.main.main(Unknown Source)
+    #+END_SRC
+  + *[general]* Introduce a simple method of rules generation (no make-rule(s))
+  + *[graph]* Check the issue of isolated nodes
+  + *[graph]* Disable self-dependencies
+  + *[graph]* Add format - graphml (yed)
+  + *[general]* Accept flat input to make-rule
+    (make-rule "ala" "ola") instead of (make-rule [ "ala" "ola"])
+  + *[general]* Accept integer values as input element to rule
+     Handle them similarly to strings
+  + *[generator]* Add a macro that defines namespace based on a filename
+  + *[generator]* Add function importing clj from specified directory
+    For constants and predefined getters.
+  + *[general]* Resolve the issue of ./ in the beginnig of scripts
+  + *[genertor]* Add automatic directories handling
+  + *[general]* Refactor names so they are consistent, e.g. change `target` to `res`
+  + *[generator]* Remove vectors from rule definition
+  + *[generator]* Add =file= helper function
+  + *[generator]* Introduce =cpu= helper function
+  + *[generator]* Introduce starred versions of =inp=, =out= and =cpu=
+  + *[generator]* Add command for getting working-directory and listing it
+  + *[general]* Remodel the directory layout
+  + *[executor]* Add graceful exiting on error of one of the jobs

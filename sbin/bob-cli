@@ -1,0 +1,18 @@
+#!/bin/bash
+
+JVM_OPTS="-ea"
+
+BREAKCHARS="(){}[],^%$#@\"\";:''|\\"
+
+START_DIR=`dirname $0`
+
+BOB_JAR="${START_DIR}"/../target/bob-standalone.jar
+
+if [ $# -eq 0 ]; then
+     rlwrap --remember -c -b "$breakchars" \
+        -f "$HOME"/.clj_completions \
+         java ${JVM_OPTS} -cp "$BOB_JAR" clojure.main
+else
+     # java -cp "$CLOJURE_JAR" clojure.main $1 -- "$@"
+     java ${JVM_OPTS} -cp "$BOB_JAR" clojure.main "$@"
+fi

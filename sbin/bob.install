@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ "${JVM_OPTS}" == ""  ]]; then
+    JVM_OPTS="-da"
+fi
+
+START_DIR=`dirname $0`
+
+BOB_JAR="${START_DIR}"/bob-standalone.jar
+
+java ${JVM_OPTS} -jar "$BOB_JAR" $@ 

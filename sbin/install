@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]]; then
+    PROG=`basename ${0}`
+    echo "Usage: ${0} DIR"
+    exit 1
+fi
+
+DIR=`dirname ${0}`
+
+lein do clean, compile, test, uberjar
+
+if [[ $? == 0 ]]; then
+    sudo install -m 644 ${DIR}/../target/bob-standalone.jar ${1}
+
+    sudo install -m 755 ${DIR}/bob-init ${1}/bob-init
+    sudo install -m 755 ${DIR}/bob-view ${1}/bob-view
+    sudo install -m 755 ${DIR}/bob.install ${1}/bob
+    sudo install -m 755 ${DIR}/bob-cli.install ${1}/bob-cli
+fi

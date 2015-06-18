@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function genBobFile {
+    local BOB_FNAME=bob.clj
+    cat << EOF > ${1}/${BOB_FNAME} 
+(bob-module)
+
+(defrule
+  [])
+EOF
+}
+
+if [ $# != 1 ]; then
+    echo "Usage: bob-init DIR"
+    exit 1
+fi
+
+if [ -e ${1} ]; then
+    echo "FATAL: ${1} already exists."
+else
+    mkdir -p ${1}
+    genBobFile ${1}
+fi

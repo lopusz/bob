@@ -1,0 +1,10 @@
+* BOB
+
+  Bob --- he [[http://www.bobthebuilder.com/row/main.html][builds]]!
+
+  This is a workflow engine similar to [[http://en.wikipedia.org/wiki/Make_%28software%29][make]], but oriented towards
+  data processing.
+
+* License
+
+  Distributed under the Eclipse Public License, the same as Clojure.

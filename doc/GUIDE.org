@@ -1,0 +1,39 @@
+* How do I handle directories for output files?
+
+  You do not have to, since ~bob~ does that for you.
+
+  TODO
+
+* How do I gracefully stop bob build process?
+  Create the file called ~STOP~ in the build directory.
+
+  This will make ~bob~ wait for all currently running processes to finish and
+  exit gracefully.
+* How do I visualize data dependencies in my workflow?
+  TODO
+* What are the allowed shapes of visulaized nodes?
+  #+BEGIN_SRC text
+  rectangle
+  ellipse
+  parallelogram
+  hexagon
+  octagon
+  diamond
+  triangle
+  trapezium
+  invtrapezium
+  box3d
+  #+END_SRC
+
+* How do I tag a group of file which are not output from a single rule?
+
+  Use tagging rules.
+
+  Tagging rules contain only fields ~tag~ and ~out~.
+  They introduce only a name for a group of files.
+  Using tagging rules you may mark also input files.
+
+  Example of tagging rule:
+  #+BEGIN_SRC clojure
+  [ [ (out* [ "A.txt" "B.txt" ]) (tag "input") ] ]
+  #+END_SRC

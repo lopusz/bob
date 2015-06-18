@@ -1,0 +1,4 @@
+digraph G {
+    "submod1/submod1a" -> "submod1/submod1b";
+    "submod2";
+}

@@ -1,0 +1,278 @@
+* Name
+** Mike = better Make
+** bit (build it), pit (process it)
+** bob (the builder)
+* Philosophy
+** Suffering Oriented Programing as rationale behind Bob
+   http://nathanmarz.com/blog/suffering-oriented-programming.html
+** The necessary components of the data workflow are described in
+   http://machinelearningmastery.com/the-seductive-trap-of-black-box-machine-learning/
+* Necessary features
+** New features
+*** TODO Add disk usage statistics ?
+*** TODO Add timing statitistics
+*** TODO Temporary or immediate files functionality
+    https://www.gnu.org/software/make/manual/html_node/Chained-Rules.html#Chained-Rules
+    Deleted after all resources that depend on them were build
+    Add special option that disables their deletion
+**** Implementation idea
+     + On the parsing phase add them to outputs and create special set
+       of the tmp files
+*** TODO Add checksum based (statefull) rebuilds
+*** TODO Running on multiple nodes with shared storage
+*** TODO Advanced CPU features
+    + Allow fractional cpus?
+    + Allow 0 cpus?
+      Use case - rule that send data to some server and waits for results
+    + Schedule task to a particular core?
+      Use case - launching tasks with taskset`
+*** TODO Add policy fail early vs. push as far as you can
+*** TODO Add no-file resources
+*** TODO HTML reports
+** Implemmented features
+*** DONE Improve performance
+    bob build  ...  # Builds
+    bob outs ...    # Shows output
+    bob clean ...   # Cleans output files
+*** DONE Save STDOUT & STDERR of built rules [ to gzipped files ]
+    No gzipped files, as they are more prone to be killed
+*** DONE Multiple outputs
+*** DONE Parallelism, each rule specifying the amount of cpus used
+*** DONE Keep declarative nature of the rules
+*** DONE Clear information on what and why is rebuild a la drake
+*** DONE Somehow split the bob_files in namespaced modules in separate files
+*** DONE Non-recursive execution, explicit loading of modules
+*** DONE Make rule syntax, so that input-files and output-files can be include once
+    [ "{{python-cmd}}"
+      (inp "script.py") (inp "data.dat") (out "plot.svg") ]
+*** DONE Tags & visualization
+*** DONE Handling dirs
+* Future/extra features
+** Gathering statistics while building process
+   final table of the sort
+   Wall time, CPUs, Produced data size, Rule
+** Command `bob du`
+   size, input files
+   size, output files
+** Remote execution on multiple machines (?) (with/without shared fs)
+** Some kind of web interface, to view what is running, what is done etc.
+** Export graph to the external files (e.g. bash scripts, for launching in PBS)
+* System design
+** When to rebuild
+   + When stamptime changed?
+     Problem when replacing a file with older version
+   + Combinnation of date & size
+     Fast but can be easily tricked
+   + Store checksum of all the files and check if they have changed
+     Slow?
+   + Have a look at pages of Makepp
+     http://makepp.sourceforge.net/2.0/makepp_build_check.html
+     http://makepp.sourceforge.net/2.0/makepp_signatures.html
+** Rule generation separate from the rule engine
+** Posibility of programmatically defining rules
+** Full rule
+   #+BEGIN_SRC clojure
+   {
+     ;; Mandatory fields
+     :inp [ "1" "2" "3" ]
+     :out [ "1.out" "2.out" "3.out" ]
+     :cmd [ "ls -1 1 > 1.out" "ls -1 > 2.out" ]
+
+     ;; Special out files that are deleted when there are no more
+     ;; resources needing them
+     :tmp [ "xxx.freq" ]
+
+     ;; Optional fields
+     :cpu 4  ;; default = 1
+     :tag #{"txt" "out"}
+   }
+   #+END_SRC
+** Alias rule = defines shorthand for rules
+   #+BEGIN_SRC clojure
+   {
+     :out [ "1.txt" "2.txt" ]
+     :tag "all"
+   }
+   #+END_SRC
+   Tags can repeat and are merged
+   Multiple tags are possible ?
+** Rules with no-file resource
+   + Rules that do other things than create a file (run a server command,
+     commit results to database)
+   + Rules should be marked with keyword in "out" field,
+     e.g. { :out :serve_html }
+   + When used as a dependency their datetime is ignored, i.e. they are not
+     considered when calculating to run a resource
+   + Is it necessary to introduce special kind of keyword resource that
+     forces rebuilding all files that depend on it  (?)
+** Rules with no input?
+   + E.g. fetch something from world wide web
+   + Should be run every time bob is invoked
+** Links
+   Drake Docs
+   + https://docs.google.com/document/d/1bF-OKNLIG10v_lMes_m4yyaJtAaJKtdK0Jizvi_MNsg/edit
+* Technology
+** Development language
+*** ClojueScript + node (webkit)
+**** Could be superfun with core-async
+*** Clojure, +reuse drake, -slow startup!!!, + platform independent
+*** Python (packaging system)
+*** Ruby
+** Graph visualization tools
+*** UML diagram service
+    http://yuml.me/
+*** Graph visualization tool = yed
+    http://www.yworks.com/
+    http://yed.yworks.com/support/qa/
+**** How to get lables work properly in yEd
+     In short:
+     + Edit/Properties mapper
+     + Add mapping
+       Data source = label
+       Map to = label text
+       Conversion = automatic
+     + Select "Fit node to label"
+     http://thirld.com/blog/2012/01/31/making-yed-import-labels-from-graphml-files/
+*** Dot to xml tool
+    https://bitbucket.org/dirkbaechle/dottoxml
+    http://dl9obn.darc.de/programming/python/dottoxml/
+    https://bitbucket.org/dirkbaechle/dottoxml
+*** Graph formats
+**** dot used by the graphviz
+     + http://en.wikipedia.org/wiki/Dot_language
+     + Adding formating to nodes
+       #+BEGIN_SRC text
+       digraph G {
+         "A" [shape=circle fillcolor=yellow style=filled]
+         "A" -> "B";
+       }
+       #+END_SRC
+      + List of shapes
+        http://www.graphviz.org/doc/info/shapes.html
+**** gml = graph modelling language
+     http://en.wikipedia.org/wiki/Graph_Modelling_Language
+**** graphml
+     + http://graphml.graphdrawing.org/primer/graphml-primer.html
+     + Adding formating to nodes
+       #+BEGIN_SRC xml
+       <?xml version="1.0" encoding="UTF-8"?>
+       <graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"
+                xmlns:y="http://www.yworks.com/xml/graphml">
+         <key attr.name="ID" attr.type="string" for="node" id="d1"><default>empty</default></key>
+         <key for="node" id="d2" yfiles.type="nodegraphics"/>
+         <graph id="G" edgedefault="directed">
+           <node id="A">
+             <data key="d1">A</data>
+             <data key="d2">
+                  <y:ShapeNode>
+                     <y:Shape type="ellipse"/>
+                     <y:Fill color="#FF0000" transparent="false"/>
+                  </y:ShapeNode>
+             </data>
+           </node>
+           <node id="B">  <data key="d1">B</data></node>
+           <edge source="A" target="B"/>
+         </graph>
+       </graphml>
+
+       #+END_SRC
+       http://yed.yworks.com/support/qa/70/how-do-i-encode-information-for-nodes-and-edges-in-graphml
+     + List of shapes
+       http://www.yworks.com/xml/schema/graphml/1.1/doc/http___www.yworks.com_xml_graphml/simpleType/shapeType.type.html
+
+**** graphml vs dot shapes
+
+     |  #  | graphmml       | dot           |
+     |-----+----------------+---------------+
+     |  1. | rectangle      | rectangle/box |
+     |  2. | roundrectangle | ?             |
+     |  3. | ellipse        | ellipse/oval  |
+     |  4. | parallelogram  | parallelogram |
+     |  5. | hexagon        | hexagon       |
+     |  6. | octagon        | octagon       |
+     |  7. | diamond        | diamond       |
+     |  8. | triangle       | triangle      |
+     |  9. | trapezoid      | trapezium     |
+     | 10. | trapezoid2     | invtrapezium  |
+     | 11. | rectangle3d    | box3d         |
+
+*** Other graph formats are listed in the graphml wiki
+    http://en.wikipedia.org/wiki/Graphml
+*** Excellent link
+    http://graphdrawing.org/
+* Sketch of the algorithm
+** Basic Workflow Concept
+   + Input: graph + required resources
+   + Cut a graph, so it contains rules only involved for required resources
+   + Cut a graph, si it contains only outdated rules that need rebuilding
+    (Q?. Maybe it is better to wait till runtime, since files may change
+         either by external modification or undeclared influence?)
+   + Run rules
+** Checking sanity of rules
+   + Resource is present only in one rule
+* Manual
+** BOB configuration
+*** location of tools
+*** options
+** Command line interface
+*** bob build [resources]
+*** bob clean [resources]
+*** bob diag  # generates diagram
+*** bob rules # shows rules
+*** bob checksum gen
+*** bob checksum verify
+* Rule files
+*** Rule generation, separated from rule execution
+*** bobfile.json file input
+*** Modules
+**** It should allow for modularity & reusability
+     Think of it heavily.
+**** Example design?
+     +-bobfile.clj
+     +-mod1
+       bobfile.clj
+     +-submod1
+       bobfile.clj
+     +-mod2
+       bobfile.clj
+    #+BEGIN_SRC clojure
+    (fn [ root-path ]
+       # all file inps & outs are padded with root-path
+       (concat
+          (gen-rules root-path "mod1/bobfile.clj")
+          (gen-rules root-path "mod2/bobfile.clj")))
+    #+END_SRC
+* Coding standard + vocabulary
+  + res (resource) is a file (input or output of a rule)
+    This may change when no-file resources are introduced
+  + substrate res - input file for a build process (no rules to build it)
+  + product res - output of a build process
+  + Add suffix -set for everything that is a set and is not obvious
+  + Add suffix -f for everything that is a function variable
+    (e.g. in let or in a record)
+  + Use double-bang (!!) for functions that may exit
+  + Use verb validate for functions that check the statke
+* Notes
+** How to increase JVM stack size?
+   java -Xss1g
+** How to check quickly if a directory is empty in Java
+   http://stackoverflow.com/questions/5930087/how-to-check-if-a-directory-is-empty-in-java
+** Flush vs. sync
+   http://stackoverflow.com/questions/4072878/i-o-concept-flush-vs-sync
+** How to make sure that file is written
+   http://stackoverflow.com/questions/4116620/how-to-be-sure-a-file-has-been-successfully-written
+** Compute relative path
+   http://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
+** Difference between the absolute and canonical path
+   http://stackoverflow.com/questions/1099300/whats-the-difference-between-getpath-getabsolutepath-and-getcanonicalpath
+** Generating canonical path
+   http://stackoverflow.com/questions/2683676/generating-a-canonical-path
+   http://docs.oracle.com/javase/7/docs/api/java/net/URI.html
+** Useful for IO manipulations
+   http://commons.apache.org/proper/commons-io/
+** Check file size efficiently
+   http://stackoverflow.com/questions/116574/java-get-file-size-efficiently
+** On graphs in Clojure
+   https://groups.google.com/forum/#!topic/clojure/h1m6Qjuh3wA

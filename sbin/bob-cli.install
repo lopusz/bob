@@ -1,0 +1,12 @@
+#!/bin/bash
+
+JVM_OPTS="-ea"
+
+BREAKCHARS="(){}[],^%$#@\"\";:''|\\"
+
+START_DIR=`dirname $0`
+
+BOB_JAR="${START_DIR}"/bob-standalone.jar
+
+rlwrap --remember -c -b "$breakchars" \
+    java ${JVM_OPTS} -cp "$BOB_JAR" clojure.main
