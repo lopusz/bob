@@ -2,6 +2,8 @@
 
   Bob --- he [[http://www.bobthebuilder.com/row/main.html][builds]]!
 
+  [[http://travis-ci.org/lopusz/bob][https://api.travis-ci.org/lopusz/bob.png?branch=master]]
+
   This is a workflow engine similar to [[http://en.wikipedia.org/wiki/Make_%28software%29][make]], but oriented towards
   data processing.
 
