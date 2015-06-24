@@ -6,7 +6,32 @@
 
   This is a workflow engine similar to [[http://en.wikipedia.org/wiki/Make_%28software%29][make]], but oriented towards
   data processing.
+** How to play?
 
-* License
+   Documentation is on the way, however, the feature set has to be frozen first :(
+
+   To play with bob, first create uberjar. Afterwards you can build or
+   clean one of the examples.
+
+   #+BEGIN_SRC sh
+   lein uberjar
+   cd examples/simple
+
+   ../../sbin/bob build  # creates files
+   ../../sbin/bob clean  # cleans all the files, which bob knows how to produce
+   #+END_SRC
+
+   All recipes are described in ~bob.clj~ file. Inspection of examples should
+   give you the idea, how it works. Note that ~bob.clj~ are normal Clojure
+   programs, so you can use the whole language power to generate the
+   appropriate rules, as long as they are known *before* launching the workflow.
+** Similar projects
+  + [[https://github.com/factual/drake][Drake]] --- probably the most mature
+    solution on the market
+  + If you are after workflows composed out of Clojure functions only
+    try these
+    + [[https://github.com/Prismatic/plumbing][Prismatic Graph & friends]]
+    + [[https://github.com/ReadyForZero/babbage][Babbage]] (not in active development?)
+** License
 
   Distributed under the Eclipse Public License, the same as Clojure.
