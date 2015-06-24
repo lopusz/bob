@@ -318,8 +318,8 @@
     :usage (str "Usage: bob garph [OPTIONS] [TAGS_EDN_FILE]\n\n"
                 "Print tags dependency graph generated on theb basis of "
                 " rules.\n"
-                "Necessary tags are read from TAGS_EDN_FILE.
-                 If the file is not given all tags are used.\n")
+                "Necessary tags are read from TAGS_EDN_FILE. "
+                "If the file is not given all tags\n are used.\n")
     :opts
       (concat
          (filter #(not= (first %) "-m") common-opts)
