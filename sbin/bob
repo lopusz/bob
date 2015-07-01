@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ "${JVM_OPTS}" == ""  ]]; then
-    JVM_OPTS="-ea"
-fi
+JVM_OPTS="-ea ${JVM_OPTS}"
 
 START_DIR=`dirname $0`
 
