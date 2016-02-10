@@ -133,9 +133,9 @@
     (@#'bob.generator/make-rule-from-seq
           [ "ls -l" (inp "file1(.txt") (inp "file2.txt") ">" (out "file.lst") ])
       { :inp #{ "file1(.txt" "file2.txt" }
-         :out #{ "file.lst" }
-         :cmd "ls -l file1\\(.txt file2.txt > file.lst"
-         :cpu 1 })))
+        :out #{ "file.lst" }
+        :cmd "ls -l file1\\(.txt file2.txt > file.lst"
+        :cpu 1 })))
 
 (deftest add-tag-test
   (let [

@@ -199,7 +199,7 @@
 (defn- gen-cumulative-kwd-seq [ kwds seq ]
   (let [
          pred-f
-        #(and (map? %) (contains-any? % kwds))
+           #(and (map? %) (contains-any? % kwds))
         ]
     (->> seq
          (filter pred-f)

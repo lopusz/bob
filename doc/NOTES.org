@@ -276,3 +276,10 @@
    http://stackoverflow.com/questions/116574/java-get-file-size-efficiently
 ** On graphs in Clojure
    https://groups.google.com/forum/#!topic/clojure/h1m6Qjuh3wA
+
+* Similar soultions
+  + Luigi
+    https://github.com/spotify/luigi
+  + Airflow
+    https://medium.com/handy-tech/airflow-tips-tricks-and-pitfalls-9ba53fba14eb#.9dtm7vez5
+    http://pythonhosted.org/airflow/tutorial.html
