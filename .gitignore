@@ -1,5 +1,6 @@
 /target
 /src/main/clojure/bob/info.clj
+bob.iml
 pom.xml
 .lein-deps-sum
 .lein-failures
