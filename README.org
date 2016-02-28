@@ -28,10 +28,12 @@
 ** Similar projects
   + [[https://github.com/factual/drake][Drake]] --- probably the most mature
     solution on the market
-  + If you are after workflows composed out of Clojure functions only
-    try these
-    + [[https://github.com/Prismatic/plumbing][Prismatic Graph & friends]]
+  + If you are after workflows composed only out of Clojure functions, try
+    these
+    + [[https://github.com/plumatic/plumbing][Plumatic (former Prismatic) Graph & friends]]
     + [[https://github.com/ReadyForZero/babbage][Babbage]] (not in active development?)
+    + Workflows can be created and executed in parallel also using =let-flow= macro from
+      [[https://github.com/ztellman/manifold][Manifold]]
 ** License
 
   Distributed under the Eclipse Public License, the same as Clojure.
