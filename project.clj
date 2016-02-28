@@ -80,6 +80,6 @@
                        (:out (clojure.java.shell/sh "sbin/info" "buil-date")))
                  :commit
                     ~(clojure.string/trim
-                       (:out (clojure.java.shell/sh "sbin/info" "commit"))) }
+                       (:out (clojure.java.shell/sh "sbin/info" "sha"))) }
                }
  )

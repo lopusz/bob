@@ -2,8 +2,8 @@
 
 function getBranchCommit
 {
-    # Fill in version info from git 
-    # If there is no git or repo return none 
+    # Fill in version info from git
+    # If there is no git or repo return none
 
     CODE_BRANCH_COMMIT="unknown"
 
@@ -12,21 +12,39 @@ function getBranchCommit
 	    git status >& /dev/null
         if [ $? == 0 ]; then
            BRANCH=`git branch | grep -e "\*" | sed -e "s/\* //"`
-            echo $BRANCH | grep -q -e "no branch" 
+            echo $BRANCH | grep -q -e "no branch"
 	        if [ $? == 0 ]; then
                 BRANCH="no branch"
-	        fi 
-            COMMIT=`git log --pretty=oneline | wc -l | sed -e "s/^ *//g"` 
+	        fi
+            COMMIT=`git log --pretty=oneline | wc -l | sed -e "s/^ *//g"`
             CODE_BRANCH_COMMIT="$BRANCH-$COMMIT"
-        fi 
+        fi
     fi
     echo ${CODE_BRANCH_COMMIT}
 }
 
 
+function getSHA
+{
+    # Fill in version info from git
+    # If there is no git or repo return none
+
+    SHA="unknown"
+
+    if which git >& /dev/null; then
+        # if git exists check if we have working copy
+	    git status >& /dev/null
+        if [ $? == 0 ]; then
+            SHA=`git log --pretty=format:'%h' -n 1`
+        fi
+    fi
+    echo ${SHA}
+}
+
+
 function getCodeVersion
 {
-    # Fill in version info from git 
+    # Fill in version info from git
     # If there is no git or repo return RELEASE
 
     CODE_VERSION="unknown"
@@ -38,13 +56,13 @@ function getCodeVersion
             CODE_VERSION=`git describe --tags | sed "s/.........$//" \
                                 | sed "s/-/\./" \
                                 | sed "s/^v//"`
-        fi 
+        fi
         MODIFIED=`git status -uno --porcelain | wc -l`
         if [ $MODIFIED -gt 0 ]; then
             CODE_VERSION="$CODE_VERSION-TOCOMMIT"
         else
             CODE_VERSION="$CODE_VERSION"
-        fi  
+        fi
     fi
     echo ${CODE_VERSION}
 }
@@ -60,10 +78,13 @@ case "${1}" in
     version)
         getCodeVersion
         ;;
-    buil-date) 
+    buil-date)
         getDateTime
         ;;
     commit)
         getBranchCommit
+        ;;
+    sha)
+        getSHA
         ;;
 esac

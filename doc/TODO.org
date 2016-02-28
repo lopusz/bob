@@ -45,6 +45,7 @@
   + *[general]* Add option to execute the build as far as possible
 
 * Done
+  + *[general]* @8 Ammend version info, so it contains SHA not branch/number
   + *[bug]* @7 =bob bu unknown-resource-or-tag= gives exception
   + *[general]* @6 Is it possible to define tasks for all CPUS?
   + *[general]* @5 Adding exiting code of last command for build
