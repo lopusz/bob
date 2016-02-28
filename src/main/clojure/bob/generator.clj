@@ -12,6 +12,14 @@
 
 ; Functionality realted to curent directory (*cur-dir*)
 
+(def ^:private max-cpu (atom 1))
+
+(defn get-max-cpu []
+  @max-cpu)
+
+(defn set-max-cpu! [ a-max-cpu ]
+  (reset! max-cpu a-max-cpu))
+
 ;; *cur-dir* is either empty or has a path with '/' at the end
 
 (def ^:dynamic ^:private ^String *cur-dir* "")
@@ -148,10 +156,14 @@
         (mapcat make-seq-and-prefix fnames))} )
 
 (defn cpu [ num-cpu ]
-  { :cpu num-cpu } )
+  { :cpu
+      (let [max @max-cpu]
+        (if (> num-cpu max) max num-cpu)) })
 
 (defn cpu* [ num-cpu ]
-   { :cpu* num-cpu })
+   { :cpu*
+      (let [max @max-cpu]
+        (if (> num-cpu max) max num-cpu)) })
 
 (defn- make-seq [ item ]
   (if (sequential? item)

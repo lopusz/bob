@@ -8,7 +8,8 @@
      [me.raynes.fs :refer [exists? file? base-name delete]]
      [bob.info :refer [get-info]]
      [bob.generator :refer
-       [gen-default-bob-file-for-dir import-module-file make-rules-from-seq2]]
+       [gen-default-bob-file-for-dir import-module-file make-rules-from-seq2
+        set-max-cpu!]]
      [bob.ruler :refer
        [calc-product-res-set calc-tag-set remove-tagging-rules]]
      [bob.executor :refer [run-rule run-rule-dummy]]
@@ -32,16 +33,36 @@
 
 (defn validate-needed-res!! [ needed-res-set rules ]
   (let [
+         all-product-res-set
+           (calc-product-res-set rules)
          unknown-res-set
            (difference
               needed-res-set
-              (calc-product-res-set rules))
+              all-product-res-set)
          err (not (empty? unknown-res-set))
          unknown-res-str
            (when err (conv-coll-to-str unknown-res-set))
         ]
-    (when err
-      (fail!! (str "Unknown resource(s) " unknown-res-str ".")))))
+    (if err
+      (fail!! (str "Unknown resource(s) " unknown-res-str "."))
+      needed-res-set)))
+
+(defn validate-needed-tags!! [ needed-tag-set rules ]
+  (let [
+          all-tags
+            (calc-tag-set rules)
+          unknown-tag-set
+            (difference
+              needed-tag-set
+              all-tags)
+          err
+            (not (empty? unknown-tag-set))
+          unknown-res-str
+            (when err (conv-coll-to-str unknown-tag-set))
+        ]
+    (if err
+      (fail!! (str "Unknown tag(s) " unknown-res-str "."))
+      needed-tag-set)))
 
 (defn conv-errors-to-str [ cmd errors ]
   (apply str
@@ -79,18 +100,6 @@
           (fail!! "Could not find " s*))))
     (fail!! "Could not find " s)))
 
-(defn reduce-cpu [ max-cpu cpu ]
-  (cond
-    (> cpu max-cpu) max-cpu
-    (= cpu -1) max-cpu
-    :else cpu))
-
-(defn correct-cpu-in-rules [ max-cpu rules ]
-  (let [
-         reduce-cpu-f #(reduce-cpu max-cpu %)
-        ]
-    (map #(update-in % [ :cpu ] reduce-cpu-f) rules)))
-
 (defn extract-out-with-any-tag [tag-set rules]
   (let [
          rules-with-any-tag
@@ -116,7 +125,12 @@
          ]
     (reduce union out-with-all-tag))))
 
-(defn gen-needed-res-set [ mode arguments rules ]
+(defn fail-on-empty-res-set!! [ res-set  tag-set]
+  (if (empty? res-set)
+    (fail!! "Empty intersection of tags " (conv-coll-to-str tag-set) ".")
+    res-set))
+
+(defn gen-needed-res-set!! [ mode arguments rules ]
   (let [
           argument-set (into #{} arguments)
         ]
@@ -124,38 +138,54 @@
       (empty? argument-set)
         (calc-product-res-set rules)
       (= mode :res)
-        argument-set
+        (validate-needed-res!! argument-set rules)
       (= mode :tags-or)
-        (extract-out-with-any-tag argument-set rules)
+        (-> argument-set
+          (validate-needed-tags!! rules)
+          (extract-out-with-any-tag rules))
       (= mode :tags-and)
-        (extract-out-with-all-tag argument-set rules))))
+        (-> argument-set
+          (validate-needed-tags!! rules)
+          (extract-out-with-all-tag rules)
+          (fail-on-empty-res-set!! argument-set)))))
 
 (defn gen-rules-and-needed-res!! [ options arguments ]
   (let [
-         { :keys [ rules-path max-cpu mode ] }
+        { :keys [ rules-path max-cpu mode ] }
            options
-         rules
+        max-cpu*
+          (if (or (nil? max-cpu)(= max-cpu -1))
+            (.availableProcessors (Runtime/getRuntime))
+            max-cpu)
+        _
+          (set-max-cpu! max-cpu*)
+        rules
            (import-rules!! rules-path)
-         needed-res-set
-           (gen-needed-res-set mode arguments rules)
-         _ (validate-needed-res!! needed-res-set rules)
+        needed-res-set
+          (gen-needed-res-set!! mode arguments rules)
       ]
-    {:rules rules :needed-res-set needed-res-set}))
+    {:rules rules :needed-res-set needed-res-set :max-cpu max-cpu*}))
 
 (defn parse-mode [s]
   (case (upper-case s)
     "A" :tags-and
     "O" :tags-or
-    :res))
+    "R" :res
+    :unknown))
 
 (def common-opts
   [ [ "-h" "--help" ]
     [ "-r" "--rules-path PATH" "file or directory with rules"
            :default "." ]
     [ "-m" "--mode MODE"
-        (str "mode forarguments interpretation "
-             "(a = tags and, o = tags or, otherwise resources)")
-       :default :tags-or :parse-fn parse-mode ] ])
+        (str "mode for arguments interpretation "
+             "(a = tags and, o = tags or, r = resource)")
+       :default :tags-or
+       :parse-fn parse-mode
+       :validate [ #(not= :unknown %)
+                    (str "The only correct mode options"
+                          " are \"-m a\", \"-m o\", and \"-m r\".") ] ] ])
+
 
 ;; BUILD COMMAND
 
@@ -176,25 +206,19 @@
          _ (fail-on-stopfile!!)
          { :keys [ options arguments ] }
            (parse-cmd-opts!! argv build-cmd-data)
-         { :keys [ rules needed-res-set ] }
-           (gen-rules-and-needed-res!! options arguments)
          { :keys [max-cpu dry-run] }
            options
-         max-cpu*
-           (if (= max-cpu -1)
-             (.availableProcessors (Runtime/getRuntime))
-             max-cpu)
+         { :keys [ rules needed-res-set max-cpu] }
+           (gen-rules-and-needed-res!! options arguments)
          rules*
-           (->> rules
-             remove-tagging-rules
-             (correct-cpu-in-rules max-cpu*))
+           (remove-tagging-rules rules)
          run-rule-f
            (if dry-run
              run-rule-dummy
              run-rule)
         ]
     (build rules* needed-res-set
-      { :max-cpu max-cpu* :run-rule-f run-rule-f })))
+      { :max-cpu max-cpu :run-rule-f run-rule-f })))
 
 ;; CLEAN COMMAND
 
@@ -290,20 +314,13 @@
            (parse-cmd-opts!! argv rules-cmd-data)
          { :keys [ rules needed-res-set ] }
            (gen-rules-and-needed-res!! options arguments)
-         { :keys [ max-cpu ] }
-           options
-         max-cpu*
-           (if (= max-cpu -1)
-             (.availableProcessors (Runtime/getRuntime))
-             max-cpu)
          rules*
-           (->> rules
-             remove-tagging-rules
-             (correct-cpu-in-rules max-cpu*))
-         [rules** _]
-           (filter-only-necessary-rules rules* needed-res-set)
+           (-> rules
+               remove-tagging-rules
+               (filter-only-necessary-rules needed-res-set)
+               first)
         ]
-    (dorun (map print-rule rules**))
+    (dorun (map print-rule rules*))
     (flush)))
 
 ;; VERSION COMMAND

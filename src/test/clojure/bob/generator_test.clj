@@ -4,6 +4,7 @@
             [bob.helper :refer [pwd]]))
 
 (deftest make-rule-from-seq-test
+  (set-max-cpu! 10)
   (is (=
     (@#'bob.generator/make-rule-from-seq
       [ (inp* "file1.txt") (inp* "file2.txt") (out* "file.lst") ])

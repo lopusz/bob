@@ -1,5 +1,4 @@
 * Issues & ideas
-  + *[bug]* =bob bu unknown-resource-or-tag= gives exception
   + *[general]* Correct the output of =bob rules= for tagging rules
     Tagging rules = rules with empty cmd and inp.
     Tagging rules define the tag for group of files.
@@ -7,7 +6,6 @@
     + number of input files
     + number of output files
     + number of rules
-  + *[general]* Is it possible to define tasks for all CPUS?
   + *[general]* Check Clojure lint https://github.com/jonase/eastwood
     Problems with running the linter version 0.1.2
     ~ArityException Wrong number of args (1) passed to: validate-loop-locals/validate-loop-locals~
@@ -47,6 +45,8 @@
   + *[general]* Add option to execute the build as far as possible
 
 * Done
+  + *[bug]* @7 =bob bu unknown-resource-or-tag= gives exception
+  + *[general]* @6 Is it possible to define tasks for all CPUS?
   + *[general]* @5 Adding exiting code of last command for build
   + *[general]* @4 Add escaping characters in filenames
      List of chars is here
